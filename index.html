@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>이음 체육대회 출석 인증</title>
+    <title>이음 체육대회 출석체크</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -44,8 +45,10 @@
 </head>
 
 <body>
+
     <div class="card">
         <h2>📍 이음 현장 출석</h2>
+
         <p>
             고척근린공원 현장에서만<br>
             출석 제출이 가능합니다.
@@ -58,23 +61,39 @@
         <div id="status"></div>
     </div>
 
+
     <script>
+        // 고척근린공원 위치
         const TARGET_LAT = 37.5012;
         const TARGET_LNG = 126.8521;
+
+        // 허용 거리 150m
         const MAX_DISTANCE = 150;
 
-        const GOOGLE_FORM_URL = "https://forms.gle/BiNJMohCSUG6eX9t7";
+        // 구글폼 주소
+        const GOOGLE_FORM_URL =
+            "https://forms.gle/BiNJMohCSUG6eX9t7";
 
+
+        // 두 위치 사이의 거리 계산
         function getDistance(lat1, lon1, lat2, lon2) {
+
             const R = 6371e3;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
+
+            const dLat =
+                (lat2 - lat1) * Math.PI / 180;
+
+            const dLon =
+                (lon2 - lon1) * Math.PI / 180;
 
             const a =
-                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.sin(dLat / 2) *
+                Math.sin(dLat / 2) +
+
                 Math.cos(lat1 * Math.PI / 180) *
                 Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                Math.sin(dLon / 2) *
+                Math.sin(dLon / 2);
 
             return R * 2 * Math.atan2(
                 Math.sqrt(a),
@@ -82,20 +101,35 @@
             );
         }
 
+
+        // 버튼을 눌렀을 때 실행
         function checkLocation() {
-            const statusDiv = document.getElementById("status");
+
+            const statusDiv =
+                document.getElementById("status");
 
             statusDiv.style.color = "#333";
-            statusDiv.innerText = "현재 위치 확인 중...";
 
+            statusDiv.innerText =
+                "현재 위치 확인 중...";
+
+
+            // 위치 기능 지원 여부 확인
             if (!navigator.geolocation) {
+
                 statusDiv.innerText =
                     "이 브라우저는 위치 서비스를 지원하지 않습니다.";
+
                 return;
             }
 
+
+            // 현재 위치 가져오기
             navigator.geolocation.getCurrentPosition(
+
+                // 위치 확인 성공
                 (pos) => {
+
                     const dist = getDistance(
                         pos.coords.latitude,
                         pos.coords.longitude,
@@ -103,30 +137,59 @@
                         TARGET_LNG
                     );
 
+
+                    // 행사장 안에 있을 경우
                     if (dist <= MAX_DISTANCE) {
-                        statusDiv.style.color = "#10b981";
+
+                        statusDiv.style.color =
+                            "#10b981";
+
                         statusDiv.innerText =
                             "✅ 현장 인증 성공! 출석 페이지로 이동합니다.";
 
+
                         setTimeout(() => {
-                            location.href = GOOGLE_FORM_URL;
+
+                            location.href =
+                                GOOGLE_FORM_URL;
+
                         }, 1000);
-                    } else {
-                        statusDiv.style.color = "#ef4444";
+
+                    }
+
+
+                    // 행사장 밖에 있을 경우
+                    else {
+
+                        statusDiv.style.color =
+                            "#ef4444";
+
                         statusDiv.innerText =
                             `❌ 행사장 외부에 있습니다. (현재 거리: ${Math.round(dist)}m)`;
                     }
                 },
+
+
+                // 위치 확인 실패
                 () => {
-                    statusDiv.style.color = "#ef4444";
+
+                    statusDiv.style.color =
+                        "#ef4444";
+
                     statusDiv.innerText =
                         "⚠️ 위치 접근을 허용해야 출석이 가능합니다.";
                 },
+
+
+                // 위치 설정
                 {
-                    enableHighAccuracy: true
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
                 }
             );
         }
     </script>
+
 </body>
 </html>
